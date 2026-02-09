@@ -1,0 +1,21 @@
+# Frontend
+node_modules/
+build/
+.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Packages
+*.tar.gz
+/packages/
