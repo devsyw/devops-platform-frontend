@@ -1,11 +1,12 @@
-# Frontend
+# Dependencies
 node_modules/
+
+# Build
 build/
-.env.local
+dist/
 
 # IDE
 .idea/
-*.iml
 .vscode/
 *.swp
 
@@ -13,9 +14,15 @@ build/
 .DS_Store
 Thumbs.db
 
-# Docker
-docker-compose.override.yml
+# Env
+.env
+.env.local
+.env.production.local
 
-# Packages
-*.tar.gz
-/packages/
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.eslintcache
+.cache/
