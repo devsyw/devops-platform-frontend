@@ -170,7 +170,7 @@ const AddonListPage = () => {
                               <tr key={v.id}>
                                 <td style={{ fontFamily: 'monospace' }}>{v.version}</td>
                                 <td>{v.helmChartVersion || '-'}</td>
-                                <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.imageTags || '-'}</td>
+                                <td style={{ maxWidth: 300, wordBreak: 'break-word', fontSize: 12 }}>{v.imageTags || '-'}</td>
                                 <td>{v.isLatest ? '✅' : ''}</td>
                                 <td>{v.syncedAt ? new Date(v.syncedAt).toLocaleDateString() : '-'}</td>
                               </tr>

@@ -86,7 +86,7 @@ const VersionOverviewPage = () => {
                       <td><strong>{a.displayName}</strong></td>
                       <td><span className="status-badge">{a.category}</span></td>
                       <td style={{ fontFamily: 'monospace' }}>{a.latestVersion || '-'}</td>
-                      <td style={{ fontSize: 12, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.helmRepoUrl || '-'}</td>
+                      <td style={{ fontSize: 12, maxWidth: 300, wordBreak: 'break-all' }}>{a.helmRepoUrl || '-'}</td>
                       <td>{imgCount}</td>
                       <td>
                         <button className="btn btn--sm btn--ghost" onClick={e => { e.stopPropagation(); setShowAddVersion(showAddVersion === a.id ? null : a.id); }}>
@@ -150,7 +150,7 @@ const VersionOverviewPage = () => {
                   <td><span className="status-badge">{l.syncType}</span></td>
                   <td><span className={'status-badge status-badge--' + (l.status === 'SUCCESS' ? 'active' : l.status === 'FAILED' ? 'expired' : 'warning')}>{l.status}</span></td>
                   <td style={{ fontSize: 12 }}>{l.newVersionsFound || '-'}</td>
-                  <td style={{ fontSize: 12, color: '#e74c3c', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.errorMessage || ''}</td>
+                  <td style={{ fontSize: 12, color: '#e74c3c', maxWidth: 300, wordBreak: 'break-word' }}>{l.errorMessage || ''}</td>
                   <td style={{ fontSize: 12 }}>{formatDate(l.startedAt)}</td>
                   <td style={{ fontSize: 12 }}>{formatDate(l.completedAt)}</td>
                 </tr>

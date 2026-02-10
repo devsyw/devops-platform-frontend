@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBuilds, downloadPackage } from '../../api/packageApi';
+import { getBuilds } from '../../api/packageApi';
 import { getCustomers } from '../../api/customerApi';
 import { FiDownload, FiFilter, FiClock } from 'react-icons/fi';
 import { toast } from 'react-toastify';
@@ -38,27 +38,12 @@ const PackageHistoryPage = () => {
       .finally(() => setLoading(false));
   }, [page, filterCustomerId]);
 
-  // const handleDownload = (hash) => {
-  //   const url = (process.env.REACT_APP_API_URL || '/api') + '/packages/download/' + hash;
-  //   const a = document.createElement('a');
-  //   a.href = url;
-  //   a.download = hash + '.tar.gz';
-  //   a.click();
-  // };
-
-  const handleDownload = async (hash) => {
-      try {
-          const res = await downloadPackage(hash);
-          const blob = new Blob([res], { type: 'application/gzip' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = hash + '.tar.gz';
-          a.click();
-          window.URL.revokeObjectURL(url);
-      } catch (e) {
-          toast.error('다운로드 실패');
-      }
+  const handleDownload = (hash) => {
+    const url = (process.env.REACT_APP_API_URL || '/api') + '/packages/download/' + hash;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = hash + '.tar.gz';
+    a.click();
   };
 
   const parseAddons = (json) => {
@@ -103,8 +88,9 @@ const PackageHistoryPage = () => {
                     <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{b.buildHash}</td>
                     <td>{b.customerName || '-'}</td>
                     <td>{b.projectName || '-'}</td>
-                    <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12 }}>{parseAddons(b.selectedAddons)}</td>
+                    <td style={{ fontSize: 12, maxWidth: 300, wordBreak: 'break-word' }}>{parseAddons(b.selectedAddons)}</td>
                     <td style={{ fontSize: 12 }}>
+                      {b.deployEnv === 'AIRGAPPED' && <span className="status-badge status-badge--warning">폐쇄망</span>}
                       {b.namespace && <span className="status-badge">ns:{b.namespace}</span>}
                       {b.tlsEnabled && <span className="status-badge status-badge--info">TLS</span>}
                       {b.keycloakEnabled && <span className="status-badge status-badge--info">SSO</span>}
