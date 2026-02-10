@@ -38,12 +38,23 @@ const PackageHistoryPage = () => {
       .finally(() => setLoading(false));
   }, [page, filterCustomerId]);
 
-  const handleDownload = (hash) => {
-    const url = (process.env.REACT_APP_API_URL || '/api') + '/packages/download/' + hash;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = hash + '.tar.gz';
-    a.click();
+  const handleDownload = async (hash) => {
+    try {
+      const url = (process.env.REACT_APP_API_URL || '/api') + '/packages/download/' + hash;
+      const res = await fetch(url);
+      if (!res.ok) {
+        toast.error('다운로드 실패: ' + res.statusText);
+        return;
+      }
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = hash + '.tar.gz';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      toast.error('다운로드 중 오류: ' + err.message);
+    }
   };
 
   const parseAddons = (json) => {
@@ -91,6 +102,7 @@ const PackageHistoryPage = () => {
                     <td style={{ fontSize: 12, maxWidth: 300, wordBreak: 'break-word' }}>{parseAddons(b.selectedAddons)}</td>
                     <td style={{ fontSize: 12 }}>
                       {b.deployEnv === 'AIRGAPPED' && <span className="status-badge status-badge--warning">폐쇄망</span>}
+                      {b.platform && b.platform !== 'linux/amd64' && <span className="status-badge" style={{ background: '#dfe6e9', color: '#2d3436' }}>{b.platform.includes(',') ? 'Multi-Arch' : b.platform.replace('linux/', '')}</span>}
                       {b.namespace && <span className="status-badge">ns:{b.namespace}</span>}
                       {b.tlsEnabled && <span className="status-badge status-badge--info">TLS</span>}
                       {b.keycloakEnabled && <span className="status-badge status-badge--info">SSO</span>}

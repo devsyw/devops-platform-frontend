@@ -17,6 +17,7 @@ const PackageBuilderPage = () => {
   const [domain, setDomain] = useState('');
   const [deployEnv, setDeployEnv] = useState('INTERNET');
   const [registryUrl, setRegistryUrl] = useState('');
+  const [platform, setPlatform] = useState('linux/amd64');
 
   const [customers, setCustomers] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -146,12 +147,13 @@ const PackageBuilderPage = () => {
         namespace, domain, tlsEnabled, keycloakEnabled,
         deployEnv,
         registryUrl: registryUrl.trim() || null,
+        platform: deployEnv === 'AIRGAPPED' ? platform : 'linux/amd64',
         builtBy: 'web-user'
       });
 
       const hash = res.data.buildHash;
       const msg = deployEnv === 'AIRGAPPED'
-        ? '폐쇄망 패키지 빌드 시작 (Chart + Image 포함, 시간이 소요됩니다)'
+        ? `폐쇄망 패키지 빌드 시작 (${platform}, Chart + Image 포함, 시간이 소요됩니다)`
         : '빌드가 시작되었습니다.';
       toast.info(msg);
 
@@ -182,13 +184,24 @@ const PackageBuilderPage = () => {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!buildResult) return;
-    const url = (process.env.REACT_APP_API_URL || '/api') + '/packages/download/' + buildResult.buildHash;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = buildResult.buildHash + '.tar.gz';
-    a.click();
+    try {
+      const url = (process.env.REACT_APP_API_URL || '/api') + '/packages/download/' + buildResult.buildHash;
+      const res = await fetch(url);
+      if (!res.ok) {
+        toast.error('다운로드 실패: ' + res.statusText);
+        return;
+      }
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = buildResult.buildHash + '.tar.gz';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      toast.error('다운로드 중 오류: ' + err.message);
+    }
   };
 
   const selectedCount = Object.values(selected).filter(Boolean).length;
@@ -233,6 +246,7 @@ const PackageBuilderPage = () => {
               <span style={{ marginLeft: 12, fontSize: 13, color: '#636e72' }}>
                 Hash: {buildResult.buildHash} | 크기: {formatSize(buildResult.totalSize)}
                 {buildResult.deployEnv === 'AIRGAPPED' && ' | 📦 폐쇄망 패키지'}
+                {buildResult.platform && buildResult.platform !== 'linux/amd64' && ` | 🖥️ ${buildResult.platform}`}
               </span>
             </div>
             <button className="btn btn--primary btn--sm" onClick={handleDownload}><FiDownload /> 다운로드</button>
@@ -279,6 +293,35 @@ const PackageBuilderPage = () => {
               ⚠️ 폐쇄망 패키지는 Helm Chart(.tgz)와 컨테이너 이미지(.tar)를 포함합니다.
               빌드 서버에 <strong>docker</strong>와 <strong>helm</strong>이 설치되어 있어야 하며, 빌드 시간이 길고 파일 크기가 큽니다.
             </div>
+
+            {/* CPU 아키텍처 선택 */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>CPU 아키텍처</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[
+                  { value: 'linux/amd64', label: 'AMD64 (x86_64)', desc: 'Intel/AMD 서버' },
+                  { value: 'linux/arm64', label: 'ARM64 (aarch64)', desc: 'AWS Graviton, Apple Silicon' },
+                  { value: 'linux/amd64,linux/arm64', label: 'Multi-Arch', desc: '양쪽 모두 (용량 2배)' }
+                ].map(opt => (
+                  <div
+                    key={opt.value}
+                    onClick={() => setPlatform(opt.value)}
+                    style={{
+                      flex: 1, padding: '10px 14px', borderRadius: 8, cursor: 'pointer',
+                      border: platform === opt.value ? '2px solid #0984e3' : '2px solid #dfe6e9',
+                      background: platform === opt.value ? '#f0f8ff' : '#fff',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: 13, color: platform === opt.value ? '#0984e3' : '#2d3436' }}>
+                      {opt.label}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#636e72', marginTop: 2 }}>{opt.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label style={{ fontSize: 13 }}>이미지 소스 레지스트리 (이미지를 pull할 주소)</label>
               <input
