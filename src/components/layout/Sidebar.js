@@ -7,6 +7,7 @@ const menuItems = [
   { path: '/dashboard', label: '대시보드', icon: FiHome },
   { path: '/customers', label: '고객사 관리', icon: FiUsers },
   { path: '/packages', label: '패키지 빌더', icon: FiPackage },
+  { path: '/packages/history', label: '빌드 이력', icon: FiPackage },
   { path: '/addons', label: '애드온 관리', icon: FiGrid },
   { path: '/certificates', label: '인증서 관리', icon: FiShield },
   { path: '/versions', label: '버전 관리', icon: FiGitBranch },

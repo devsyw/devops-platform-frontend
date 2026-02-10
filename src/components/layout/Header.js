@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FiBell } from 'react-icons/fi';
+import { getUnreadCount } from '../../api/notificationApi';
 
 const pageTitles = {
   '/dashboard': '대시보드',
@@ -16,6 +17,15 @@ const Header = () => {
   const location = useLocation();
   const basePath = '/' + location.pathname.split('/')[1];
   const title = pageTitles[basePath] || 'DevOps Platform';
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    getUnreadCount().then(res => setUnread(res.data || 0)).catch(() => {});
+    const interval = setInterval(() => {
+      getUnreadCount().then(res => setUnread(res.data || 0)).catch(() => {});
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="header">
@@ -23,7 +33,7 @@ const Header = () => {
       <div className="header__actions">
         <div className="header__notification">
           <FiBell />
-          <span className="header__badge">3</span>
+          {unread > 0 && <span className="header__badge">{unread}</span>}
         </div>
       </div>
     </header>
