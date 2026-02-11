@@ -1,8 +1,8 @@
 # ---- Build Stage ----
 FROM node:18-alpine AS build
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json ./
+RUN npm install
 COPY public/ public/
 COPY src/ src/
 ENV REACT_APP_API_URL=/api
